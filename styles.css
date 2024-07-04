@@ -418,7 +418,105 @@ body {
 #results-area div {
   margin-bottom: 20px;
 }
+/* Existing CSS remains the same */
 
+/* Media queries for responsiveness */
+
+/* For screens smaller than 1200px */
+@media (max-width: 1200px) {
+  #userRegistration, #question-page, #results-page {
+    width: 80%;
+    min-width: 600px;
+  }
+  #form {
+    height: 40%;
+  }
+  #formInputs1, #formInputs2 {
+    width: 60%;
+  }
+  #question-area {
+    height: 380px;
+  }
+  #ans-buttons {
+    width: 90%;
+  }
+  #results-area {
+    width: 90%;
+    height: 300px;
+  }
+}
+
+/* For screens smaller than 992px */
+@media (max-width: 992px) {
+  #userRegistration, #question-page, #results-page {
+    width: 90%;
+    min-width: 400px;
+  }
+  #form {
+    height: 50%;
+  }
+  #formInputs1, #formInputs2 {
+    width: 70%;
+  }
+  #question-area {
+    height: 320px;
+  }
+  #ans-buttons {
+    width: 100%;
+  }
+  #results-area {
+    width: 100%;
+    height: 250px;
+  }
+}
+
+/* For screens smaller than 768px */
+@media (max-width: 768px) {
+  #userRegistration, #question-page, #results-page {
+    width: 100%;
+    min-width: 300px;
+  }
+  #form {
+    height: 60%;
+  }
+  #formInputs1, #formInputs2 {
+    width: 80%;
+  }
+  #question-area {
+    height: 260px;
+  }
+  #ans-buttons {
+    flex-direction: column;
+  }
+  #results-area {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+/* For screens smaller than 480px */
+@media (max-width: 480px) {
+  #userRegistration, #question-page, #results-page {
+    width: 100%;
+    min-width: 200px;
+  }
+  #form {
+    height: 70%;
+  }
+  #formInputs1, #formInputs2 {
+    width: 90%;
+  }
+  #question-area {
+    height: 200px;
+  }
+  #ans-buttons {
+    flex-direction: column;
+  }
+  #results-area {
+    width: 100%;
+    height: 150px;
+  }
+}
 footer {
   margin-top: 30px;
   text-align: center;
