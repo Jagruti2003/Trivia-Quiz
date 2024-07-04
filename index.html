@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trivia Quiz</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-container"></div>
+  <section id="userRegistration">
+    <h1 class="quiz-title">Trivia Quiz</h1>
+    <div id="form">
+      <div id="formInputs">
+        <div id="formInputs1">
+          <label for="userNameInput">Username:</label>
+          <input type="text" id="userNameInput">
+        </div>
+
+        <div id="formInputs2">
+          <label for="numberOfQuestions">Number of questions:</label>
+          <input type="number" id="numberOfQuestions" value="10" max="50">
+
+          <label for="categorySelect">Category:</label>
+          <select id="categorySelect">
+            <option value="any">Any Category</option>
+            <option value="9">General Knowledge</option>
+            <option value="10">Entertainment: Books</option>
+            <option value="11">Entertainment: Film</option>
+            <option value="12">Entertainment: Music</option>
+            <option value="13">Entertainment: Musicals & Theatre</option>
+            <option value="14">Entertainment: Television</option>
+            <option value="15">Entertainment: Video Games</option>
+            <option value="16">Entertainment: Board Games</option>
+            <option value="17">Science & Nature</option>
+            <option value="18">Science: Computers</option>
+            <option value="19">Science: Mathematics</option>
+            <option value="20">Mythology</option>
+            <option value="21">Sports</option>
+            <option value="22">Geography</option>
+            <option value="23">History</option>
+            <option value="24">Politics</option>
+            <option value="25">Art</option>
+            <option value="26">Celebrities</option>
+            <option value="27">Animals</option>
+            <option value="28">Vehicles</option>
+            <option value="29">Entertainment: Comics</option>
+            <option value="30">Science: Gadgets</option>
+            <option value="31">Entertainment: Japanese Anime & Manga</option>
+            <option value="32">Entertainment: Cartoon & Animations</option>
+          </select>
+
+          <label for="difficultySelect">Difficulty:</label>
+          <select id="difficultySelect">
+            <option value="any">Any Difficulty</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </div>
+      <div id="formBtn">
+        <button id="startBtn">Submit</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="question-page">
+    <div id="welcome-stats">
+      <div id="welcome-msg">
+        <h3>Welcome <span id="h3user">username</span></h3>
+      </div>
+      <div id="stats">
+        <span id="q-number"><strong>Question:</strong></span>
+        <span id="cat"><strong>Category:</strong></span>
+        <span id="diff"><strong>Difficulty:</strong></span>
+      </div>
+    </div>
+    <div id="question-area">
+      <h3 id="questionH3"></h3>
+      <div id="question-box">
+        <p id="question-text"></p>
+      </div>
+      <div id="ans-buttons">
+        <button>Answer 1</button>
+        <button>Answer 2</button>
+        <button>Answer 3</button>
+        <button>Answer 4</button>
+      </div>
+      <button id="next-q">Next</button>
+    </div>
+  </section>
+
+  <section id="results-page">
+    <h1>Results Page</h1>
+    <div id="game-config">
+      <hr>
+    </div>
+    <div id="results-area"></div>
+  </section>
+
+  <script>
+    // DOM REFERENCES
+    const userRegPage = document.querySelector("#userRegistration");
+    const usernameInput = document.querySelector("#userNameInput");
+    const numOfQuestions = document.querySelector("#numberOfQuestions");
+    const categorySelect = document.querySelector("#categorySelect");
+    const difficultySelect = document.querySelector("#difficultySelect");
+    const submitBtn = document.querySelector("#startBtn");
+    // Question page
+    const questionPage = document.querySelector("#question-page");
+    const greetingSpan = document.querySelector("#h3user");
+    const qNumberOfSpan = document.querySelector("#q-number");
+    const categorySpan = document.querySelector("#cat");
+    const difficultySpan = document.querySelector("#diff");
+    const nextBtn = document.querySelector("#next-q");
+    // Results page
+    const resultsPage = document.querySelector("#results-page");
+    const configArea = document.querySelector("#game-config");
+
+    // GLOBAL VARIABLES
+    let playerName;
+    let qNumber = 0;
+    let maxQNumber;
+    let userAnswer;
+    let questionSet;
+    let gameArray = [];
+
+    // EVENT LISTENERS
+    submitBtn.addEventListener("click", submitForm);
+    nextBtn.addEventListener("click", nextQuestion);
+
+    // FUNCTIONS
+
+    /*
+      HANDLE SUBMIT CLICK EVENT - SubmitForm(),
+      GRAB VALUES FROM USER INPUTS - getFormData(),
+      VALIDATE AND SET PLAYERNAME,
+      BUILD THE API URL BASED ON SELECTIONS- buildURL(),
+      SEND FECTCH WITH URL TO GET QUESTIONS -getQuestions().
+    */
+    function submitForm() {
+      const { username, number, category, difficulty } = getFormData();
+      if (!username) {
+        alert("Enter a username first!");
+        return;
+      }
+      playerName = username;
+      let url = buildURL(number, category, difficulty);
+      getQuestions(url);
+      changeScene(userRegPage, questionPage);
+    }
+
+    function getFormData() {
+      let username = usernameInput.value;
+      let number = numOfQuestions.value;
+      maxQNumber = number;
+      let category = categorySelect.value;
+      let difficulty = difficultySelect.value;
+      console.log(username, number, category, difficulty);
+
+      return {
+        username,
+        number,
+        category,
+        difficulty,
+      };
+    }
+
+    function buildURL(num, cat, diff) {
+      let apiURL = `https://opentdb.com/api.php?amount=${num}`;
+      if (cat!== "any") apiURL += `&category=${cat}`;
+      if (diff!== "any") apiURL += `&difficulty=${diff}`;
+      return apiURL;
+    }
+
+    async function getQuestions(url) {
+      let response = await fetch(url);
+      let data = await response.json();
+      console.log(data);
+      questionSet = data.results;
+      populateQuestion(questionSet);
+    }
+
+    /*
+    PROCESS QUESTIONS OBJECT FROM FECTCH FUNCTION
+    CHANGE SCREEN TO QUESTION SCREEN
+    - POPULATE ELEMENTS AND QUESTION DATA PER QUESTION
+    EVENT FOR NEXT BUTTON.
+    */
+
+    function changeScene(from, to) {
+      from.style.display = "none";
+      to.style.display = "block";
+    }
+
+    function populateWelcomeFields(category, difficulty) {
+      greetingSpan.innerText = playerName;
+      qNumberOfSpan.innerText = ` ${qNumberOfSpan.innerText.slice(0, 9)} ${
+        qNumber + 1
+      } of ${maxQNumber}`;
+      categorySpan.innerText = `${categorySpan.innerText.slice(0, 10)} ${category}`;
+      difficultySpan.innerText = `${difficultySpan.innerText.slice(
+        0,
+        11
+      )} ${difficulty}`;
+    }
+
+    function populateQuestionBoxes(questionObj) {
+      document.querySelector("#questionH3").innerText = `Question ${qNumber + 1}:`;
+      document.querySelector("#question-text").innerHTML = questionObj.question;
+      populateAnswerBoxes([
+        questionObj.correct_answer,
+       ...questionObj.incorrect_answers,
+      ]);
+    }
+
+    function populateAnswerBoxes(arr) {
+      // shuffle array contents
+      for (let i = 0; i < arr.length; i++) {
+        let btn = document.createElement("button");
+        btn.innerHTML = arr[i];
+        btn.setAttribute("data.text", arr[i]);
+        btn.addEventListener("click", selectAnswer);
+        const btnArea = document.querySelector("#ans-buttons");
+        btnArea.appendChild(btn);
+
+        nextBtn.classList.remove("selected");
+        nextBtn.disabled = true;
+      }
+
+      /* const answerBtns = document.querySelector('#ans-buttons');
+      let buttons = answerBtns.querySelectorAll('button');
+      buttons = Array.from(buttons);
+      buttons.forEach((btn, i) => {
+        btn.innerText = arr[i];
+        btn.setAttribute('data.text', arr[i]);
+        btn.addEventListener('click', selectAnswer);
+        btn.style.display = 'block';
+      }) */
+    }
+
+    function populateQuestion(qArray) {
+      populateWelcomeFields(qArray[qNumber].category, qArray[qNumber].difficulty);
+      populateQuestionBoxes(qArray[qNumber]);
+    }
+
+    function selectAnswer(e) {
+      e.stopPropagation();
+      userAnswer = e.target.attributes[0].value;
+      e.target.classList.toggle("selected");
+      document.querySelectorAll("div#ans-buttons button").forEach((btn) => {
+        if (btn.attributes[0].value!== e.target.attributes[0].value) {
+          btn.classList.remove("selected");
+        }
+      });
+      nextBtn.classList.add("selected");
+      nextBtn.disabled = false;
+console.log(userAnswer);
+    }
+
+    function nextQuestion() {
+  console.log("Next question called. qNumber:", qNumber, "maxQNumber:", maxQNumber);
+  if (qNumber < maxQNumber - 1) {
+    gameArray.push({
+      question: `${qNumber}`,
+      userSelection: userAnswer,
+      correct: questionSet[qNumber].correct_answer,
+    });
+    qNumber++;
+    removeButtons();
+    populateQuestion(questionSet);
+  } else {
+    console.log("Transitioning to results page");
+    // Push final answer
+    gameArray.push({
+      question: `${qNumber}`,
+      userSelection: userAnswer,
+      correct: questionSet[qNumber].correct_answer, // Fixed typo here
+    });
+    // display end of game results
+    questionPage.style.display = "none";
+    resultsPage.style.display = "block";
+    // populate results area
+    populateResultsArea();
+  }
+}
+
+function populateResultsArea() {
+  try {
+    console.log("Populating results area");
+    populateConfigArea();
+    const resultsObj = gameArray;
+    resultsObj.forEach((obj) => {
+      const { question, userSelection, correct } = obj;
+      let div = document.createElement("div");
+      let ul = document.createElement("ul"); // Fixed: changed to ul
+      let h3 = document.createElement("h3");
+      h3.innerText = `Question: ${Number(question) + 1}`;
+      let ansLi = document.createElement("li");
+      ansLi.innerText = `Your Answer: ${userSelection}`;
+      if (userSelection === correct) {
+        ansLi.style.color = "green";
+      } else {
+        ansLi.style.color = "red";
+      }
+      let corrLi = document.createElement("li");
+      corrLi.innerText = `Correct Answer: ${correct}`;
+      ul.appendChild(ansLi);
+      ul.appendChild(corrLi);
+      div.appendChild(h3);
+      div.appendChild(ul);
+      document.querySelector("#results-area").appendChild(div);
+    });
+    document.querySelector("#results-page").appendChild(showScore());
+    console.log("Results area populated successfully");
+  } catch (error) {
+    console.error("Error in populateResultsArea:", error);
+  }
+}
+
+    function removeButtons() {
+      const answerBtns = document.querySelector("#ans-buttons");
+      let buttons = answerBtns.querySelectorAll("button");
+      buttons.forEach((btn) => {
+        btn.removeEventListener("click", selectAnswer);
+        btn.remove();
+      });
+    }
+
+    function showScore() {
+      let numberCorrect = 0;
+      gameArray.forEach((question) => {
+        if (question.userSelection === question.correct) {
+          numberCorrect += 1;
+        }
+      });
+      const p = document.createElement("p");
+      p.innerText = `You answered ${numberCorrect} out of ${maxQNumber} questions correctly.`;
+      return p;
+    }
+
+  function populateResultsArea() {
+  try {
+    console.log("Populating results area");
+    populateConfigArea();
+    const resultsObj = gameArray;
+    resultsObj.forEach((obj, index) => {
+      const { question, userSelection, correct } = obj;
+      let div = document.createElement("div");
+      div.className = "result-item";
+      div.style.animation = `fadeIn 0.5s ${index * 0.1}s both`;
+      let h3 = document.createElement("h3");
+      h3.innerText = `Question: ${Number(question) + 1}`;
+      let answerP = document.createElement("p");
+      answerP.innerHTML = `Your Answer: <span style="color: ${userSelection === correct ? 'green' : 'red'}">${userSelection}</span>`;
+      let correctP = document.createElement("p");
+      correctP.innerHTML = `Correct Answer: <span style="color: gold">${correct}</span>`;
+      div.appendChild(h3);
+      div.appendChild(answerP);
+      div.appendChild(correctP);
+      document.querySelector("#results-area").appendChild(div);
+    });
+    let scoreDiv = document.createElement("div");
+    scoreDiv.className = "score";
+    scoreDiv.appendChild(showScore());
+    document.querySelector("#results-page").appendChild(scoreDiv);
+    console.log("Results area populated successfully");
+  } catch (error) {
+    console.error("Error in populateResultsArea:", error);
+  }
+}
+
+    function populateConfigArea() {
+      const h3 = document.createElement("h3");
+      h3.innerText = `Player: ${playerName}`;
+      const p = document.createElement("p");
+      p.innerText = `Category: ${questionSet[0].category}`;
+      const hr = document.createElement("hr");
+      configArea.appendChild(h3);
+      configArea.appendChild(p);
+      configArea.appendChild(hr);
+    }
+
+    function changeScene(from, to) {
+      from.style.animation = 'fadeOut 0.5s';
+      setTimeout(() => {
+      from.style.display = "none";
+      to.style.display = "block";
+      to.style.animation = 'fadeIn 0.5s';
+      }, 500);
+    }
+  </script>
+</body>
+</html>
