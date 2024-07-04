@@ -418,10 +418,6 @@ body {
 #results-area div {
   margin-bottom: 20px;
 }
-/* Existing CSS remains the same */
-
-/* Media queries for responsiveness */
-
 /* For screens smaller than 1200px */
 @media (max-width: 1200px) {
   #userRegistration, #question-page, #results-page {
